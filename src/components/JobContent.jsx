@@ -156,11 +156,11 @@ const job = jobdata || {};
 
         <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
           <div className="flex gap-1 md:gap-5">
-            <span className="text-[12px] md:text-[8px] md:text-xs italic">
+            <span className="text-[7vh] md:text-[8px] md:text-xs italic">
               {job.postedAt ? `Posted on: ${new Date(job.postedAt).toLocaleDateString()}` : 'Posted on: N/A'}
             </span>
-            <span className="text-[12px] md:text-[8px] md:text-xs italic">Openings: {job.openings || 1}</span>
-            <span className="text-[12px] md:text-[8px] md:text-xs italic">Applicants: {job.applicantsCount || 0}</span>
+            <span className="text-[7vh] md:text-[8px] md:text-xs italic">Openings: {job.openings || 1}</span>
+            <span className="text-[7vh] md:text-[8px] md:text-xs italic">Applicants: {job.applicantsCount || 0}</span>
           </div>
           <div>
             <button
@@ -232,3 +232,4 @@ const job = jobdata || {};
 };
 
 export default JobContent;
+
