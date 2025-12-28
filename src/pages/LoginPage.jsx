@@ -95,7 +95,7 @@ const onSubmit = async (formdata) => {
     </div>
     <div className="flex-1 flex justify-center items-center">
       <img
-      src="/public/recruitment.png"
+      src="/recruitment.png"
       className="h-[80%] w-[80%]"
       />
     </div>
@@ -200,3 +200,4 @@ const onSubmit = async (formdata) => {
 }
 
 export default RecruiterLoginPage
+
