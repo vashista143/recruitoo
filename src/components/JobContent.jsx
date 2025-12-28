@@ -108,7 +108,7 @@ useEffect(() => {
 const job = jobdata || {};
 
   return (
-    <div className="pl-auto md:pl-20 md:pt-10 pt-5 md:mt-0">
+    <div className="pl-auto px-[3%] md:pl-20 md:pt-10 pt-5 md:px-auto md:mt-0">
       <div className="relative w-[100%] bg-white border border-gray-200 rounded-xl p-5 md:p-6 shadow-lg transition-transform duration-150 transform hover:scale-103 hover:shadow-2xl flex-shrink-0">
         {applyloading && (
           <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-20 rounded-xl">
@@ -156,18 +156,18 @@ const job = jobdata || {};
 
         <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
           <div className="flex gap-1 md:gap-5">
-            <span className="text-[8px] md:text-xs italic">
+            <span className="text-[12px] md:text-[8px] md:text-xs italic">
               {job.postedAt ? `Posted on: ${new Date(job.postedAt).toLocaleDateString()}` : 'Posted on: N/A'}
             </span>
-            <span className="text-[8px] md:text-xs italic">Openings: {job.openings || 1}</span>
-            <span className="text-[8px] md:text-xs italic">Applicants: {job.applicantsCount || 0}</span>
+            <span className="text-[12px] md:text-[8px] md:text-xs italic">Openings: {job.openings || 1}</span>
+            <span className="text-[12px] md:text-[8px] md:text-xs italic">Applicants: {job.applicantsCount || 0}</span>
           </div>
           <div>
             <button
               onClick={() => applyhandle()}
               disabled={applyloading || applied || !userauthuser?.resumeParsedText}
 
-              className={`px-1 py-1 md:px-4 md:py-2 rounded-xl text-white transition-all hover:cursor-pointer ${
+              className={`px-3 py-2 md:px-4 md:py-2 rounded-xl text-white transition-all hover:cursor-pointer ${
   !userauthuser?.resumeParsedText
     ? "bg-gray-400 cursor-not-allowed"
     : applied
@@ -176,7 +176,6 @@ const job = jobdata || {};
     ? "bg-blue-400 cursor-not-allowed"
     : "bg-blue-600 hover:scale-103 cursor-pointer"
 }`}
-
             >
               {!userauthuser?.resumeParsedText
   ? "Complete Profile"
