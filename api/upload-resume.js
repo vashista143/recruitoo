@@ -2,7 +2,12 @@ import { v2 as cloudinary } from "cloudinary"
 import formidable from "formidable"
 import fs from "fs"
 import os from "os"
-import { PDFParse } from "pdf-parse"   // ✅ correct import for v2
+import { createRequire } from "module"
+const require = createRequire(import.meta.url)
+const pdf = require("pdf-parse")
+
+const parsedPdf = await pdf(fileBuffer)
+const parsedText = parsedPdf.text
 import User from "../lib/models/user.js"
 import db from "../lib/connectdb.js"
 
@@ -80,3 +85,4 @@ export default async function handler(req, res) {
     })
   }
 }
+
