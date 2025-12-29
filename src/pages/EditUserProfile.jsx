@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import NavBar from '../components/NavBar'
 import ProfileProgressCircle from '../components/ProfileProgess'
+import toast from "react-hot-toast"
 
 const EditUserProfile = ({ userauthuser, setuserauthuser }) => {
   const [edituserform, setedituserform] = useState(false)
+  const [resumeUploading, setResumeUploading] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const calculateProfileScore = () => {
@@ -63,7 +65,7 @@ const EditUserProfile = ({ userauthuser, setuserauthuser }) => {
   const handleFileSelect = (file) => {
     if (!file) return
     if (file.type !== "application/pdf") {
-      alert("Only PDF files allowed")
+      toast.error("Only PDF files allowed")
       return
     }
     setResumeFile(file)
@@ -89,7 +91,7 @@ const EditUserProfile = ({ userauthuser, setuserauthuser }) => {
 
       if (!res.ok) {
         setLoading(false)
-        alert("Failed to update")
+        toast.error("Failed to update")
         return
       }
 
@@ -103,48 +105,62 @@ const EditUserProfile = ({ userauthuser, setuserauthuser }) => {
     } catch (error) {
       console.error(error)
       setLoading(false)
-      alert("Error updating user")
+      toast.error("Error updating user")
     }
   }
 
 
 
-  const handleSubmit = async () => {
-    if (!resumeFile) {
-      alert("Please upload a resume first")
+const handleSubmit = async () => {
+  if (!resumeFile) {
+    toast.error("Please upload a resume first")
+    return
+  }
+
+  const formData = new FormData()
+  formData.append("resume", resumeFile)
+  formData.append("userid", userauthuser?._id)
+
+  try {
+    setResumeUploading(true)
+
+    const response = await fetch(`/api/upload-resume`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      console.error(result)
+      toast.error(result?.message || "Failed to upload resume")
       return
     }
 
-    const formData = new FormData()
-    formData.append("resume", resumeFile)
-    formData.append("userid", userauthuser?._id)
+    toast.success("Resume uploaded successfully")
+    console.log("Upload result:", result)
 
-    try {
-      const response = await fetch(`/api/upload-resume`, {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        console.error(result)
-        alert("Failed to upload resume")
-        return
-      }
-
-      alert("Resume uploaded successfully")
-      console.log("Upload result:", result)
-      setResumeFile(null);
-    } catch (error) {
-      console.error("Upload error:", error)
-      alert("Error uploading resume")
-    }
+    setResumeFile(null)
+  } catch (error) {
+    console.error("Upload error:", error)
+    toast.error("Error uploading resume")
+  } finally {
+    setResumeUploading(false)
   }
+}
+
+
 
 
   return (
+    <>
+    {resumeUploading && (
+  <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+  </div>
+)}
+
     <div className=''>
 
       {edituserform && (
@@ -451,14 +467,27 @@ const EditUserProfile = ({ userauthuser, setuserauthuser }) => {
 
           {/* Submit button */}
           <button
-            onClick={handleSubmit}
-            className="mt-5 bg-blue-600 text-white px-2 py-1 md:px-4 md:py-2 rounded hover:bg-blue-700"
-          >
-            Save Resume
-          </button>
+  onClick={handleSubmit}
+  disabled={resumeUploading}
+  className={`mt-5 flex items-center justify-center gap-2
+    bg-blue-600 text-white px-2 py-1 md:px-4 md:py-2 rounded
+    ${resumeUploading ? "opacity-60 cursor-not-allowed" : "hover:bg-blue-700"}
+  `}
+>
+  {resumeUploading ? (
+    <>
+      <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+      Uploading...
+    </>
+  ) : (
+    "Save Resume"
+  )}
+</button>
+
         </div>
       </div>
     </div>
+    </>
   )
 }
 
