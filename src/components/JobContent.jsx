@@ -15,7 +15,7 @@ const JobContent = ({appliedjobs, setappliedjobs, userauthuser, jobProp, jobId }
 console.log(applied)
 const applyhandle = async () => {
   if (!userauthuser?.resumeParsedText || userauthuser.resumeParsedText.trim() === "") {
-    alert("Please upload your resume and complete your profile before applying.");
+    toast.error("Please upload your resume and complete your profile before applying.");
     return;
   }
   setapplyloading(true);
@@ -234,4 +234,5 @@ const job = jobdata || {};
 };
 
 export default JobContent;
+
 
