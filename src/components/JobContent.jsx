@@ -164,7 +164,7 @@ const job = jobdata || {};
           </div>
           <div>
             <button
-  onClick={handleApplyClick}
+  onClick={applyhandle}
   disabled={applyloading || applied}
   className={`px-3 py-2 md:px-4 md:py-2 rounded-xl text-white transition-all
     ${
@@ -234,3 +234,4 @@ const job = jobdata || {};
 };
 
 export default JobContent;
+
