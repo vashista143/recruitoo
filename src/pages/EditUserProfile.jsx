@@ -137,7 +137,11 @@ const handleSubmit = async () => {
       toast.error(result?.message || "Failed to upload resume")
       return
     }
-
+    calculateProfileScore();
+setuserauthuser(prev => ({
+  ...prev,
+  resumePdfUrl: result.resumeUrl
+}))
     toast.success("Resume uploaded successfully")
     console.log("Upload result:", result)
 
@@ -492,3 +496,4 @@ const handleSubmit = async () => {
 }
 
 export default EditUserProfile
+
