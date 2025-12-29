@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Briefcase, MapPin, Star } from "lucide-react";
-
+import toast from 'react-hot-toast';
 const SkillTag = ({ children }) => (
   <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-200">
     {children}
@@ -156,35 +156,37 @@ const job = jobdata || {};
 
         <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
           <div className="flex gap-1 md:gap-5">
-            <span className="text-[7vh] md:text-[8px] md:text-xs italic">
+            <span className="text-[12px] md:text-[8px] md:text-xs italic">
               {job.postedAt ? `Posted on: ${new Date(job.postedAt).toLocaleDateString()}` : 'Posted on: N/A'}
             </span>
-            <span className="text-[7vh] md:text-[8px] md:text-xs italic">Openings: {job.openings || 1}</span>
-            <span className="text-[7vh] md:text-[8px] md:text-xs italic">Applicants: {job.applicantsCount || 0}</span>
+            <span className="text-[12px] md:text-[8px] md:text-xs italic">Openings: {job.openings || 1}</span>
+            <span className="text-[12px] md:text-[8px] md:text-xs italic">Applicants: {job.applicantsCount || 0}</span>
           </div>
           <div>
             <button
-              onClick={() => applyhandle()}
-              disabled={applyloading || applied || !userauthuser?.resumeParsedText}
-
-              className={`px-3 py-2 md:px-4 md:py-2 rounded-xl text-white transition-all hover:cursor-pointer ${
-  !userauthuser?.resumeParsedText
-    ? "bg-gray-400 cursor-not-allowed"
+  onClick={handleApplyClick}
+  disabled={applyloading || applied}
+  className={`px-3 py-2 md:px-4 md:py-2 rounded-xl text-white transition-all
+    ${
+      !userauthuser?.resumeParsedText
+        ? "bg-gray-400 cursor-pointer"
+        : applied
+        ? "bg-green-600 cursor-default"
+        : applyloading
+        ? "bg-blue-400 cursor-not-allowed"
+        : "bg-blue-600 hover:scale-103 cursor-pointer"
+    }
+  `}
+>
+  {!userauthuser?.resumeParsedText
+    ? "Complete Profile"
     : applied
-    ? "bg-green-600 cursor-default"
-    : "applyloading..."
-    ? "bg-blue-400 cursor-not-allowed"
-    : "bg-blue-600 hover:scale-103 cursor-pointer"
-}`}
-            >
-              {!userauthuser?.resumeParsedText
-  ? "Complete Profile"
-  : applied
-  ? "Applied"
-  : applyloading
-  ? "Applying..."
-  : "Apply"}
-            </button>
+    ? "Applied"
+    : applyloading
+    ? "Applying..."
+    : "Apply"}
+</button>
+
           </div>
         </div>
       </div>
@@ -232,4 +234,3 @@ const job = jobdata || {};
 };
 
 export default JobContent;
-
