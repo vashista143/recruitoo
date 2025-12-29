@@ -140,7 +140,8 @@ const handleSubmit = async () => {
     calculateProfileScore();
 setuserauthuser(prev => ({
   ...prev,
-  resumePdfUrl: result.resumeUrl
+  resumePdfUrl: result.resumeUrl,  
+  resumeParsedText: result.resumeParsedText
 }))
     toast.success("Resume uploaded successfully")
     console.log("Upload result:", result)
@@ -496,4 +497,5 @@ setuserauthuser(prev => ({
 }
 
 export default EditUserProfile
+
 
