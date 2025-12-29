@@ -72,6 +72,7 @@ export default async function handler(req, res) {
     await User.findByIdAndUpdate(userId, {
       resumePdfUrl: uploaded.secure_url,
       resumeParsedText: parsedText,
+      resumeParsedText: parsedText,
     })
 
     // ✅ cleanup temp file
@@ -90,3 +91,4 @@ export default async function handler(req, res) {
     })
   }
 }
+
