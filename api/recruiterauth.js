@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import Recruiter from "../lib/models/recruitor.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const PHONE_REGEX = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{7,15}$/;
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -12,27 +14,30 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
   const { mode, email, password } = req.body || {};
 
-  if (!mode) {
-    return res.status(400).json({ success: false, message: "Mode required: login or register" });
+  if (!mode || !["login", "register"].includes(mode)) {
+    return res.status(400).json({ success: false, message: "Valid mode required: login or register" });
   }
 
-  if (!email || !password) {
+  if (!email || typeof email !== "string" || !password || typeof password !== "string") {
     return res.status(400).json({ success: false, message: "Email and password are required" });
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+
+  if (!EMAIL_REGEX.test(normalizedEmail)) {
+    return res.status(400).json({ success: false, message: "Please provide a valid email address" });
   }
 
   try {
     await db.connect();
 
-    // ****************************************
-    // LOGIN MODE
-    // ****************************************
     if (mode === "login") {
-      const recruiter = await Recruiter.findOne({ email }).select("+password");
+      const recruiter = await Recruiter.findOne({ email: normalizedEmail }).select("+password");
 
       if (!recruiter) {
         return res.status(401).json({ success: false, message: "Invalid email or password" });
@@ -64,9 +69,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // ****************************************
-    // REGISTER MODE
-    // ****************************************
     if (mode === "register") {
       const {
         name,
@@ -77,30 +79,42 @@ export default async function handler(req, res) {
         bio,
         location,
         contactNumber
-      } = req.body;
+      } = req.body || {};
 
-      if (!name || !email || !password || !companyName) {
-        return res.status(400).json({ success: false, message: "Required fields missing" });
+      if (!name || typeof name !== "string" || !name.trim()) {
+        return res.status(400).json({ success: false, message: "Full name is required" });
       }
 
-      const exists = await Recruiter.findOne({ email });
+      if (!companyName || typeof companyName !== "string" || !companyName.trim()) {
+        return res.status(400).json({ success: false, message: "Company name is required" });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+      }
+
+      if (contactNumber && !PHONE_REGEX.test(String(contactNumber).trim())) {
+        return res.status(400).json({ success: false, message: "Invalid contact number format" });
+      }
+
+      const exists = await Recruiter.findOne({ email: normalizedEmail });
       if (exists) {
-        return res.status(400).json({ success: false, message: "Email already registered" });
+        return res.status(409).json({ success: false, message: "Email already registered" });
       }
 
       const hashed = await bcrypt.hash(password, 10);
 
       const recruiter = await Recruiter.create({
-        name,
-        email,
+        name: name.trim(),
+        email: normalizedEmail,
         password: hashed,
-        companyName,
-        companyWebsite,
-        designation,
-        department,
-        bio,
-        location,
-        contactNumber
+        companyName: companyName.trim(),
+        companyWebsite: (companyWebsite || "").trim(),
+        designation: (designation || "").trim(),
+        department: (department || "").trim(),
+        bio: (bio || "").trim(),
+        location: (location || "").trim(),
+        contactNumber: contactNumber ? String(contactNumber).trim() : ""
       });
 
       const token = jwt.sign(
@@ -128,6 +142,10 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("Recruiter Auth Error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  } finally {
+    try {
+      await db.disconnect?.();
+    } catch {}
   }
 }
