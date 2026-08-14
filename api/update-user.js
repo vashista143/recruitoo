@@ -5,21 +5,34 @@ const MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed"
+    });
   }
 
   const { userid, name, education, university, gender, dateOfBirth, mobile, email, location } = req.body || {};
 
   if (!userid) {
-    return res.status(400).json({ message: "User id missing" });
+    return res.status(400).json({
+      success: false,
+      message: "Failed to update profile: User ID is required"
+    });
   }
 
-  if (mobile) {
-    const cleanedMobile = String(mobile).replace(/[\s-+]/g, "").slice(-10);
+  let sanitizedMobile;
+  if (mobile !== undefined && mobile !== null && String(mobile).trim() !== "") {
+    const cleaned = String(mobile).replace(/[\s-+]/g, "").slice(-10);
 
-    if (!MOBILE_REGEX.test(cleanedMobile)) {
-      return res.status(400).json({ message: "Please provide a valid 10-digit mobile number" });
+    if (!MOBILE_REGEX.test(cleaned)) {
+      return res.status(400).json({
+        success: false,
+        errorField: "mobile",
+        message: "Failed to update profile: Please enter a valid 10-digit mobile number starting with 6-9"
+      });
     }
+
+    sanitizedMobile = cleaned;
   }
 
   try {
@@ -31,7 +44,7 @@ export default async function handler(req, res) {
       ...(university !== undefined && { university: String(university).trim() }),
       ...(gender !== undefined && { gender }),
       ...(dateOfBirth !== undefined && { dateOfBirth }),
-      ...(mobile !== undefined && { mobile: String(mobile).replace(/[\s-+]/g, "").slice(-10) }),
+      ...(sanitizedMobile !== undefined && { mobile: sanitizedMobile }),
       ...(email !== undefined && { email: String(email).toLowerCase().trim() }),
       ...(location !== undefined && { location: String(location).trim() }),
     };
@@ -43,17 +56,24 @@ export default async function handler(req, res) {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Failed to update profile: User account not found"
+      });
     }
 
     return res.status(200).json({
-      message: "User updated successfully",
+      success: true,
+      message: "Profile updated successfully",
       user: updatedUser
     });
 
   } catch (error) {
-    console.error("Update user error", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Update user error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update profile: An unexpected server error occurred. Please try again later."
+    });
   } finally {
     try {
       await DB.disconnect?.();
